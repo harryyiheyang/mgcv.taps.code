@@ -6,11 +6,9 @@ G11=G1[which(G1$Score.p>0.05&G1$jump.q<0.1),]
 G22=G2[which(G2$Score.p>0.05&G2$slopechange.q<0.1),]
 G11=G11%>%dplyr::select(Outcome=outcome,`Jump Estimate`=jump.est,`Jump SE`=`jump.se`,`Jump P`=jump.p,`Jump Q`=jump.q,`Score Test P`=Score.p)
 G22=G22[-11,]
-# 安装（如果尚未安装）
-# install.packages("forestplot")
 
-library(forestplot)
-library(dplyr)
+#library(forestplot)
+#library(dplyr)
 
 G11 <- G1 %>%
   filter(Score.p > 0.05 & jump.q < 0.1) %>%

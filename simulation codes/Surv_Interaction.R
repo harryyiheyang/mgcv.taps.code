@@ -1,4 +1,4 @@
-library(mgcv.maps)
+library(mgcv.taps)
 library(mgcv)
 library(survival)
 options(bitmapType="cairo")

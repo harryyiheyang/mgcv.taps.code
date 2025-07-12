@@ -1,4 +1,4 @@
-library(mgcv.maps)
+library(mgcv.taps)
 library(mgcv)
 library(survival)
 N=c(1:10)*500
