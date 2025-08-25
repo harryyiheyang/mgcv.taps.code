@@ -40,59 +40,61 @@ w1 <- merge(w2, w1, by = "ID")
 w2 <- readRDS("~/mgcv_maps_simulation/UKBB_Disease.rds")
 NAM_Disease=colnames((w2))
 w1 <- merge(w2, w1, by = "ID")
+w1$SBP=ifelse(w1$BPDrug==1,w1$SBP+15,w1$SBP)
+w1$DBP=ifelse(w1$BPDrug==1,w1$DBP+10,w1$DBP)
+w1$PP=w1$SBP-w1$DBP
+w2=readRDS("~/MRJones_CRE/PRS/NewBP_PRS_50000.rds")%>%dplyr::select(ID,PP_PRS=PP_All)
+w1=merge(w1,w2,by="ID")
 ind <- which(w1$ID %in% union(UKBBWithdraw$V1, UKBBKinship))
 w1 <- w1[-ind, ]
 eurind <- readRDS("~/Mr.Jones/indeur.rds")
 w1 <- w1[which(w1$ID %in% eurind), ]
 NAM_Disease=NAM_Disease[c(2,3,6,8,9,10,11,12)]
-NAM_Phenotype=c("ALB","ALP",'ALT',"APOA","APOB","AST","TBL","BMI","BUN","CA","CRP","CysC","DBP",
-                "FPG","GGT","HB","HT","HBA1C","HDL","HEG","LDL","LYM","Mono","Neutro","IGF1",
-                "PLA","RBC","SBP","SHBG","RET","TCh","TG","TT","TP","UA","VTD","WBC")
+NAM_Phenotype=c("ALB","ALP",'ALT',"APOA","APOB","AST","TBL","BMI","BUN","CA","CRP","CysC","DBP","FPG","GGT","HB","HT","HBA1C","HDL","HEG","LDL","LYM","Mono","Neutro","IGF1","PLA","PP","RBC","SBP","SHBG","RET","TCh","TG","TT","TP","UA","VTD","WBC")
 phenotype_fullnames <- c(
-  ALB   = "Albumin",
-  ALP   = "Alkaline Phosphatase",
-  ALT   = "Alanine Aminotransferase",
-  APOA  = "Apolipoprotein A",
-  APOB  = "Apolipoprotein B",
-  AST   = "Aspartate Aminotransferase",
-  TBL   = "Total Bilirubin",
-  BMI   = "Body Mass Index",
-  BUN   = "Blood Urea Nitrogen",
-  CA    = "Calcium",
-  CRP   = "C-reactive Protein",
-  CysC  = "Cystatin C",
-  DBP   = "Diastolic Blood Pressure",
-  FPG   = "Fasting Plasma Glucose",
-  GGT   = "Gamma-Glutamyl Transferase",
-  HB    = "Hemoglobin",
-  HT    = "Hematocrit",
-  HBA1C = "Hemoglobin A1c",
-  HDL = "HDL Cholesterol",
-  HEG   = "Height",
-  LDL = "LDL Cholesterol",
-  LYM   = "Lymphocyte Count",
-  Mono  = "Monocyte Count",
-  Neutro= "Neutrophil Count",
-  IGF1  = "Insulin-like Growth Factor 1",
-  PLA   = "Platelet Count",
-  RBC   = "Erythrocyte Count",
-  SBP   = "Systolic Blood Pressure",
-  SHBG  = "Sex Hormone-Binding Globulin",
-  RET   = "Reticulocyte Count",
-  TCh = "Total Cholesterol",
-  TG = "Triglyceride",
-  TT    = "Total Testosterone",
-  TP    = "Total Protein",
-  UA    = "Uric Acid",
-  VTD   = "Vitamin D",
-  WBC   = "Leukocytes Count"
+ALB   = "Albumin",
+ALP   = "Alkaline Phosphatase",
+ALT   = "Alanine Aminotransferase",
+APOA  = "Apolipoprotein A",
+APOB  = "Apolipoprotein B",
+AST   = "Aspartate Aminotransferase",
+TBL   = "Total Bilirubin",
+BMI   = "Body Mass Index",
+BUN   = "Blood Urea Nitrogen",
+CA    = "Calcium",
+CRP   = "C-reactive Protein",
+CysC  = "Cystatin C",
+DBP   = "Diastolic Blood Pressure",
+FPG   = "Fasting Plasma Glucose",
+GGT   = "Gamma-Glutamyl Transferase",
+HB    = "Hemoglobin",
+HT    = "Hematocrit",
+HBA1C = "Hemoglobin A1c",
+HDL = "HDL Cholesterol",
+HEG   = "Height",
+LDL = "LDL Cholesterol",
+LYM   = "Lymphocyte Count",
+Mono  = "Monocyte Count",
+Neutro= "Neutrophil Count",
+IGF1  = "Insulin-like Growth Factor 1",
+PLA   = "Platelet Count",
+PP   = "Pulse Pressure",
+RBC   = "Erythrocyte Count",
+SBP   = "Systolic Blood Pressure",
+SHBG  = "Sex Hormone-Binding Globulin",
+RET   = "Reticulocyte Count",
+TCh = "Total Cholesterol",
+TG = "Triglyceride",
+TT    = "Total Testosterone",
+TP    = "Total Protein",
+UA    = "Uric Acid",
+VTD   = "Vitamin D",
+WBC   = "Leukocytes Count"
 )
-w1$SBP=ifelse(w1$BPDrug==1,w1$SBP+15,w1$SBP)
-w1$DBP=ifelse(w1$BPDrug==1,w1$DBP+10,w1$DBP)
 
 test_results <- list()
 G=list()
-for (i in 1:37) {
+for (i in 1:38) {
 trait <- NAM_Phenotype[i]
 if(trait!="LDL"|trait!="TCh"){
 wi=w1%>%dplyr::select(trait,paste0(trait,"_PRS"),Age,Sex,paste0("PC",1:10))%>%as.data.frame(.)%>%na.omit(.)
@@ -112,25 +114,25 @@ g_Outcome=data.frame(outcome=trait,edf=wald_Outcome$smooth.df,int.est=coef(fit_O
 
 b <- getViz(fit_Outcome)
 plot_1 <- plot(sm(b, 1)) +
-  l_ciPoly(mul = 5, fill = "#60c5ba", alpha = 0.25) +
-  l_rug(mapping = aes(x = x), alpha = 0.25, color = "#60c5ba") +
-  l_fitLine(colour = "black", size = 1) +
-  geom_hline(yintercept=0,linetype="dashed")+
-  theme_get() + ggtitle(glue("Outcome: {trait}\nVarying Coefficient: Age"))+
-  xlab("Age") + ylab((glue('{trait} PRS x s(Age)'))) +
-  theme(panel.border = element_rect(colour = "black", fill = NA, size = 1),
-        panel.background = element_rect(fill = "#f4f4f4")) +
-  annotation_custom(
-    grob = grobTree(
-      textGrob(
-        label = glue("Effect.df = {round(summary(fit_Outcome)$edf[1],3)}\nWald.p = {format(g_Outcome$wald.p, scientific = TRUE, digits = 2)}\nScore.p = {format(g_Outcome$score.p, scientific = TRUE, digits = 2)}"),
-        x = 0.8, y = 0.2,
-        hjust = 0, vjust = 1,
-        gp = gpar(fontsize = 11)
-      )
-    ),
-    xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf
-  )
+l_ciPoly(mul = 5, fill = "#60c5ba", alpha = 0.25) +
+l_rug(mapping = aes(x = x), alpha = 0.25, color = "#60c5ba") +
+l_fitLine(colour = "black", size = 1) +
+geom_hline(yintercept=0,linetype="dashed")+
+theme_get() + ggtitle(glue("Outcome: {trait}\nVarying Coefficient: Age"))+
+xlab("Age") + ylab((glue('{trait} PRS x s(Age)'))) +
+theme(panel.border = element_rect(colour = "black", fill = NA, size = 1),
+panel.background = element_rect(fill = "#f4f4f4")) +
+annotation_custom(
+grob = grobTree(
+textGrob(
+label = glue("Effect.df = {round(summary(fit_Outcome)$edf[1],3)}\nWald.p = {format(g_Outcome$wald.p, scientific = TRUE, digits = 2)}\nScore.p = {format(g_Outcome$score.p, scientific = TRUE, digits = 2)}"),
+x = 0.8, y = 0.2,
+hjust = 0, vjust = 1,
+gp = gpar(fontsize = 11)
+)
+),
+xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf
+)
 
 
 G[[i]]=g_Outcome

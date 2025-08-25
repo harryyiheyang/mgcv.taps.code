@@ -5,7 +5,7 @@ library(DT)
 # Define data
 NAM_Phenotype <- c("ALB","ALP",'ALT',"APOA","APOB","AST","TBL","BMI","BUN","CA","CRP","CysC","DBP", 
                    "FPG","GGT","HB","HT","HBA1C","HDL","HEG","LDL","LYM","Mono","Neutro","IGF1", 
-                   "PLA","RBC","SBP","SHBG","RET","TCh","TG","TT","TP","UA","VTD","WBC","CAD",
+                   "PLA","PP","RBC","SBP","SHBG","RET","TCh","TG","TT","TP","UA","VTD","WBC","CAD",
                    "Stroke","HF","AF","PAD","T2D","SMK","DRNK")
 
 phenotype_fullnames <- c(
@@ -35,6 +35,7 @@ phenotype_fullnames <- c(
   Neutro = "Neutrophil Count", 
   IGF1 = "Insulin-like Growth Factor 1", 
   PLA = "Platelet Count", 
+  PP = "Pulse Pressure",
   RBC = "Erythrocyte Count", 
   SBP = "Systolic Blood Pressure", 
   SHBG = "Sex Hormone-Binding Globulin", 
@@ -84,9 +85,9 @@ ui <- dashboardPage(
                            h4("Analysis Type"),
                            selectInput("analysis_type", 
                                        label = NULL,
-                                       choices = c("PRS Linearity Test" = "PRS",
-                                                   "Age-PRS Linear Interaction Test" = "Age"),
-                                       selected = "PRS")
+                                       choices = c("Age Interaction Test" = "Age",
+                                                   "Retirement RDD/RKD Test" = "Retirement"),
+                                       selected = "Age")
                     ),
                     
                     column(6,
@@ -110,9 +111,7 @@ ui <- dashboardPage(
                       style = "text-align: center;",
                       h4(textOutput("plot_title")),
                       br(),
-                      imageOutput("analysis_plot", height = "540px"),
-                      br(),
-                      p(em("Image path: "), textOutput("image_path", inline = TRUE))
+                      uiOutput("plot_area")
                     )
                   ),
                   
@@ -133,6 +132,9 @@ ui <- dashboardPage(
 # Server
 server <- function(input, output, session) {
   
+  # 添加静态文件资源路径
+  addResourcePath("images", ".")
+  
   # Update trait selection with search functionality
   observe({
     updateSelectizeInput(session, "trait_select",
@@ -140,14 +142,37 @@ server <- function(input, output, session) {
                          server = TRUE)
   })
   
-  # Generate image path
-  image_path <- reactive({
+  # Generate web-accessible image path(s)
+  web_image_path <- reactive({
     if (input$trait_select != "") {
-      folder <- input$analysis_type
       trait_code <- input$trait_select
-      paste0(folder, "/", trait_code, "_plot.png")
+      
+      if (input$analysis_type == "Age") {
+        # Age 目录下二选一：优先 *_plot.png，其次 *_plot_quan.png
+        cand <- c(
+          paste0("Age/", trait_code, "_plot.png"),
+          paste0("Age/", trait_code, "_plot_quan.png")
+        )
+        
+        for (path in cand) {
+          if (file.exists(path)) {
+            return(paste0("images/", path))
+          }
+        }
+        return(NA_character_)
+        
+      } else {
+        # Retirement：并排两张
+        p1 <- paste0("Retirement/", trait_code, "_RDD_quan.png")
+        p2 <- paste0("Retirement/", trait_code, "_RKD_quan.png")
+        
+        web_p1 <- if (file.exists(p1)) paste0("images/", p1) else NA_character_
+        web_p2 <- if (file.exists(p2)) paste0("images/", p2) else NA_character_
+        
+        return(c(web_p1, web_p2))
+      }
     } else {
-      NULL
+      return(NULL)
     }
   })
   
@@ -155,36 +180,74 @@ server <- function(input, output, session) {
   output$plot_title <- renderText({
     if (input$trait_select != "") {
       trait_name <- phenotype_fullnames[input$trait_select]
-      analysis_name <- ifelse(input$analysis_type == "PRS", 
-                              "PRS Linearity Test", 
-                              "Age-PRS Linear Interaction Test")
+      analysis_name <- ifelse(input$analysis_type == "Age", 
+                              "Age Interaction Test", 
+                              "Retirement RDD/RKD Test")
       paste(analysis_name, "-", trait_name)
     }
   })
   
-  # Output image path
-  output$image_path <- renderText({
-    image_path()
-  })
-  
-  # Display image
-  output$analysis_plot <- renderImage({
-    if (input$trait_select != "") {
-      path <- image_path()
-      
-      # Check if file exists
-      if (file.exists(path)) {
-        list(src = path,
-             alt = "Analysis Plot",
-             style = "max-width: 100%; height: 100%;")
-      } else {
-        # Return placeholder image if file doesn't exist
-        list(src = "placeholder.png",
-             alt = "Image not found",
-             style = "max-width: 100%; height: 100%;")
-      }
+  # Display image(s): Age 单图；Retirement 并排两图
+  output$plot_area <- renderUI({
+    if (input$trait_select == "") return(NULL)
+    paths <- web_image_path()
+    
+    # 占位图策略
+    placeholder <- NULL
+    if (file.exists("www/placeholder.png")) {
+      placeholder <- "placeholder.png"  # www目录下的文件可以直接访问
+    } else if (file.exists("placeholder.png")) {
+      placeholder <- "images/placeholder.png"
     }
-  }, deleteFile = FALSE)
+    
+    if (input$analysis_type == "Age") {
+      src <- if (!is.null(paths) && length(paths) >= 1 && !is.na(paths[1])) {
+        paths[1]
+      } else {
+        placeholder
+      }
+      
+      if (is.null(src)) {
+        return(tags$div(style="color:#999; padding: 100px 0; text-align: center;",
+                        h4("Image not found")))
+      }
+      
+      tags$img(src = src, alt = "Analysis Plot",
+               style = "max-width: 100%; height: 540px; object-fit: contain;")
+      
+    } else {
+      # Retirement：两列（RDD | RKD）
+      p1 <- if (length(paths) >= 1 && !is.na(paths[1])) paths[1] else placeholder
+      p2 <- if (length(paths) >= 2 && !is.na(paths[2])) paths[2] else placeholder
+      
+      fluidRow(
+        column(
+          6,
+          tags$div(
+            style = "text-align: center;",
+            if (is.null(p1)) {
+              tags$div(style="color:#999; padding: 50px 0;", h5("RDD image not found"))
+            } else {
+              tags$img(src = p1, alt = "RDD Plot",
+                       style = "width: 100%; height: 540px; object-fit: contain;")
+            }
+          )
+        ),
+        column(
+          6,
+          tags$div(
+            style = "text-align: center;",
+            if (is.null(p2)) {
+              tags$div(style="color:#999; padding: 50px 0;", h5("RKD image not found"))
+            } else {
+              tags$img(src = p2, alt = "RKD Plot",
+                       style = "width: 100%; height: 540px; object-fit: contain;")
+            }
+          )
+        )
+      )
+    }
+  })
 }
 
 # Run the app
