@@ -1,0 +1,93 @@
+Trait,Category
+CAD,Cardiovascular Diseases
+Stroke,Cardiovascular Diseases
+HF,Cardiovascular Diseases
+AF,Cardiovascular Diseases
+PAD,Cardiovascular Diseases
+T2D,Diabetes Related
+SMK,Other
+DRNK,Other
+ALB,Liver Function
+ALP,Liver Function
+ALT,Liver Function
+APOA,Lipid
+APOB,Lipid
+AST,Liver Function
+TBL,Liver Function
+BMI,Basic Traits
+BUN,Renal Function
+CA,Other
+CRP,Other
+CysC,Renal Function
+DBP,Blood Pressure
+FPG,Diabetes Related
+GGT,Liver Function
+HB,Blood Cell
+HT,Blood Cell
+HBA1C,Diabetes Related
+HDL,Lipid
+HEG,Basic Traits
+LDL,Lipid
+LYM,Blood Cell
+Mono,Blood Cell
+Neutro,Blood Cell
+IGF1,Hormone Related
+PLA,Blood Cell
+PP,Blood Pressure
+RBC,Blood Cell
+SBP,Blood Pressure
+SHBG,Hormone Related
+RET,Blood Cell
+TCh,Lipid
+TG,Lipid
+TT,Hormone Related
+TP,Liver Function
+UA,Renal Function
+VTD,Hormone Related
+WBC,Blood Cell
+Coronary Artery Disease,Cardiovascular Diseases
+Ischemic Stroke,Cardiovascular Diseases
+Heart Failure,Cardiovascular Diseases
+Atrial Fibrillation,Cardiovascular Diseases
+Peripheral Artery Disease,Cardiovascular Diseases
+Type 2 Diabetes,Diabetes Related
+Smoking Initiation,Other
+Frequently Drink,Other
+Albumin,Liver Function
+Alkaline Phosphatase,Liver Function
+Alanine Aminotransferase,Liver Function
+Apolipoprotein A,Lipid
+Apolipoprotein B,Lipid
+Aspartate Aminotransferase,Liver Function
+Total Bilirubin,Liver Function
+Body Mass Index,Basic Traits
+Blood Urea Nitrogen,Renal Function
+Calcium,Other
+C-reactive Protein,Other
+Cystatin C,Renal Function
+Diastolic Blood Pressure,Blood Pressure
+Fasting Plasma Glucose,Diabetes Related
+Gamma-Glutamyl Transferase,Liver Function
+Hemoglobin,Blood Cell
+Hematocrit,Blood Cell
+Hemoglobin A1c,Diabetes Related
+HDL Cholesterol,Lipid
+Height,Basic Traits
+LDL Cholesterol,Lipid
+Lymphocyte Count,Blood Cell
+Monocyte Count,Blood Cell
+Neutrophil Count,Blood Cell
+Insulin-like Growth Factor 1,Hormone Related
+Platelet Count,Blood Cell
+Pulse Pressure,Blood Pressure
+Erythrocyte Count,Blood Cell
+Systolic Blood Pressure,Blood Pressure
+Sex Hormone-Binding Globulin,Hormone Related
+Reticulocyte Count,Blood Cell
+Total Cholesterol,Lipid
+Triglyceride,Lipid
+Total Testosterone,Hormone Related
+Total Protein,Liver Function
+Uric Acid,Renal Function
+Vitamin D,Hormone Related
+Leukocytes Count,Blood Cell
